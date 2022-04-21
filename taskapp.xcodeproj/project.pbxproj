@@ -14,6 +14,7 @@
 		6E6CBD96280F8F8F00225BA1 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 6E6CBD94280F8F8F00225BA1 /* Main.storyboard */; };
 		6E6CBD98280F8F9100225BA1 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 6E6CBD97280F8F9100225BA1 /* Assets.xcassets */; };
 		6E6CBD9B280F8F9100225BA1 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 6E6CBD99280F8F9100225BA1 /* LaunchScreen.storyboard */; };
+		6E7B1600280F98E2007F3BCE /* Task.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6E7B15FF280F98E2007F3BCE /* Task.swift */; };
 		6E9C1B4ED744362E10CC7478 /* Pods_taskapp.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B82F97B49C46987615D9362F /* Pods_taskapp.framework */; };
 /* End PBXBuildFile section */
 
@@ -28,6 +29,7 @@
 		6E6CBD97280F8F9100225BA1 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		6E6CBD9A280F8F9100225BA1 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		6E6CBD9C280F8F9100225BA1 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		6E7B15FF280F98E2007F3BCE /* Task.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Task.swift; sourceTree = "<group>"; };
 		B82F97B49C46987615D9362F /* Pods_taskapp.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_taskapp.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		CF81FB46D560CFBCB7D0EF4E /* Pods-taskapp.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-taskapp.debug.xcconfig"; path = "Target Support Files/Pods-taskapp/Pods-taskapp.debug.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -58,7 +60,6 @@
 				CF81FB46D560CFBCB7D0EF4E /* Pods-taskapp.debug.xcconfig */,
 				11056E2E46CEF92CF5EF10D5 /* Pods-taskapp.release.xcconfig */,
 			);
-			name = Pods;
 			path = Pods;
 			sourceTree = "<group>";
 		};
@@ -87,6 +88,7 @@
 				6E222B4A280F945200CC2D96 /* InputViewController.swift */,
 				6E6CBD90280F8F8F00225BA1 /* SceneDelegate.swift */,
 				6E6CBD92280F8F8F00225BA1 /* ViewController.swift */,
+				6E7B15FF280F98E2007F3BCE /* Task.swift */,
 				6E6CBD94280F8F8F00225BA1 /* Main.storyboard */,
 				6E6CBD97280F8F9100225BA1 /* Assets.xcassets */,
 				6E6CBD99280F8F9100225BA1 /* LaunchScreen.storyboard */,
@@ -212,6 +214,7 @@
 			files = (
 				6E6CBD93280F8F8F00225BA1 /* ViewController.swift in Sources */,
 				6E6CBD8F280F8F8F00225BA1 /* AppDelegate.swift in Sources */,
+				6E7B1600280F98E2007F3BCE /* Task.swift in Sources */,
 				6E6CBD91280F8F8F00225BA1 /* SceneDelegate.swift in Sources */,
 				6E222B4B280F945200CC2D96 /* InputViewController.swift in Sources */,
 			);
@@ -363,6 +366,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = VLX3TBH3BF;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = taskapp/Info.plist;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
@@ -391,6 +395,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = VLX3TBH3BF;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = taskapp/Info.plist;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
