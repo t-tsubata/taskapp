@@ -9,9 +9,9 @@ import UIKit
 import RealmSwift
 import UserNotifications
 
-class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSource, UISearchBarDelegate {
+class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSource, UIPickerViewDelegate, UIPickerViewDataSource {
     
-    @IBOutlet weak var tableView: UITableView! {
+    @IBOutlet private weak var tableView: UITableView! {
         didSet {
             self.tableView.fillerRowHeight = UITableView.automaticDimension
             self.tableView.delegate = self
@@ -19,9 +19,18 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
         }
     }
     
+    /*
     @IBOutlet weak var searchBar: UISearchBar! {
         didSet {
             self.searchBar.delegate = self
+        }
+    }
+    */
+    
+    @IBOutlet private weak var pickerView: UIPickerView! {
+        didSet {
+            self.pickerView.delegate = self
+            self.pickerView.dataSource = self
         }
     }
     
@@ -32,16 +41,25 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
     // 日付の近い順でソート：昇順
     // 以降内容をアップデートするとリスト内は自動的に更新される。
     private var taskArray = try! Realm().objects(Task.self).sorted(byKeyPath: "date", ascending: true)
+    
+    // DB内のカテゴリーが格納されるリスト。
+    private var categoryArray = try! Realm().objects(Category.self).sorted(byKeyPath: "id", ascending: true)
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        // Do any additional setup after loading the view.
+        let zeroCategory = Category()
+        zeroCategory.id = 0
+        zeroCategory.name = "すべてのカテゴリ"
+        try! realm.write {
+            self.realm.add(zeroCategory, update: .modified)
+        }
     }
     
     // 入力画面から戻ってきた時に TableView を更新させる
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         tableView.reloadData()
+        pickerView.reloadAllComponents()
     }
     
     // segue で画面遷移する時に呼ばれる
@@ -124,6 +142,37 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
         }
     }
     
+    // UIPickerViewの列の数
+    func numberOfComponents(in pickerView: UIPickerView) -> Int {
+        return 1
+    }
+    
+    // UIPickerViewの行数、リストの数
+    func pickerView(_ pickerView: UIPickerView, numberOfRowsInComponent component: Int) -> Int {
+        return categoryArray.count
+    }
+    
+    // UIPickerViewの最初の表示
+    func pickerView(_ pickerView: UIPickerView, titleForRow row: Int, forComponent component: Int) -> String? {
+        let text = categoryArray[row].name
+        return text
+    }
+    
+    // UIPickerViewのRowが選択された時の挙動
+    func pickerView(_ pickerView: UIPickerView, didSelectRow row: Int, inComponent component: Int) {
+        let searchResults = realm.objects(Task.self).filter("category.name == %@", categoryArray[row].name)
+        let allTasks = realm.objects(Task.self)
+        
+        if categoryArray[row].name != "すべてのカテゴリ" {
+            taskArray = searchResults
+        } else {
+            taskArray = allTasks
+        }
+        
+        tableView.reloadData()
+    }
+    
+    /*
     //  検索バーに入力があったら呼ばれる
     func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
         let searchResults = realm.objects(Task.self).filter("category == %@", searchText)
@@ -137,4 +186,5 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
         
         tableView.reloadData()
     }
+    */
 }

@@ -9,15 +9,28 @@ import UIKit
 import RealmSwift
 import UserNotifications
 
-class InputViewController: UIViewController {
-    @IBOutlet weak var titleTextField: UITextField!
-    @IBOutlet weak var categoryTextField: UITextField!
-    @IBOutlet weak var contentsTextView: UITextView!
-    @IBOutlet weak var datePicker: UIDatePicker!
+class InputViewController: UIViewController, UIPickerViewDelegate, UIPickerViewDataSource {
     
-    let realm = try! Realm()
+    @IBOutlet private weak var titleTextField: UITextField!
+    //@IBOutlet weak var categoryTextField: UITextField!
+    @IBOutlet private weak var contentsTextView: UITextView!
+    @IBOutlet private weak var datePicker: UIDatePicker!
+    @IBOutlet private weak var categoryLabel: UILabel!
+    @IBOutlet private weak var pickerView: UIPickerView! {
+        didSet {
+            pickerView.delegate = self
+            pickerView.dataSource = self
+        }
+    }
+    
+    private let realm = try! Realm()
+    
     var task: Task!
-    
+    private var category: Category!
+    private var categoryName = ""
+    // DB内のカテゴリーが格納されるリスト。
+    private var categoryArray = try! Realm().objects(Category.self).filter("id >= 1").sorted(byKeyPath: "id", ascending: true)
+
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -25,16 +38,30 @@ class InputViewController: UIViewController {
         let tapGesture: UITapGestureRecognizer = UITapGestureRecognizer(target:self, action:#selector(dismissKeyboard))
         self.view.addGestureRecognizer(tapGesture)
         
-        titleTextField.text = task.title
-        categoryTextField.text = task.category
-        contentsTextView.text = task.contents
-        datePicker.date = task.date
+        self.titleTextField.text = task.title
+        //categoryTextField.text = task.category
+        self.contentsTextView.text = task.contents
+        self.categoryLabel.text = task.category?.name
+        self.datePicker.date = task.date
+    }
+    
+    // カテゴリ入力画面から戻ってきた時に PickerView を更新させる
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        
+        pickerView.reloadAllComponents()
     }
     
     override func viewWillDisappear(_ animated: Bool) {
+        let predicate = NSPredicate(format: "name == %@", categoryName)
+        category = realm.objects(Category.self).filter(predicate).first
+        
         try! realm.write {
             self.task.title = self.titleTextField.text!
-            self.task.category = self.categoryTextField.text!
+            //self.task.category = self.categoryTextField.text!
+            if category != nil {
+                self.task.category = self.category
+            }
             self.task.contents = self.contentsTextView.text
             self.task.date = self.datePicker.date
             self.realm.add(self.task, update: .modified)
@@ -43,6 +70,36 @@ class InputViewController: UIViewController {
         setNotification(task: task)
         
         super.viewWillDisappear(animated)
+    }
+    
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        let categoryViewController:CategoryViewController = segue.destination as! CategoryViewController
+        let category = Category()
+        let allCategories = realm.objects(Category.self)
+        category.id = allCategories.max(ofProperty: "id")! + 1
+        categoryViewController.category = category
+    }
+    
+    // UIPickerViewの列の数
+    func numberOfComponents(in pickerView: UIPickerView) -> Int {
+        return 1
+    }
+    
+    // UIPickerViewの行数、リストの数
+    func pickerView(_ pickerView: UIPickerView, numberOfRowsInComponent component: Int) -> Int {
+        return categoryArray.count
+    }
+    
+    // UIPickerViewの最初の表示
+    func pickerView(_ pickerView: UIPickerView, titleForRow row: Int, forComponent component: Int) -> String? {
+        let text = categoryArray[row].name
+        return text
+    }
+    
+    // UIPickerViewのRowが選択された時の挙動
+    func pickerView(_ pickerView: UIPickerView, didSelectRow row: Int, inComponent component: Int) {
+        categoryLabel.text = categoryArray[row].name
+        categoryName = categoryArray[row].name
     }
     
     // タスクのローカル通知を登録する --- ここから ---
