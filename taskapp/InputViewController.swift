@@ -9,10 +9,10 @@ import UIKit
 import RealmSwift
 import UserNotifications
 
-class InputViewController: UIViewController, UIPickerViewDelegate, UIPickerViewDataSource {
+// MARK: vars and lifecycle
+class InputViewController: UIViewController {
     
     @IBOutlet private weak var titleTextField: UITextField!
-    //@IBOutlet weak var categoryTextField: UITextField!
     @IBOutlet private weak var contentsTextView: UITextView!
     @IBOutlet private weak var datePicker: UIDatePicker!
     @IBOutlet private weak var categoryLabel: UILabel!
@@ -26,10 +26,11 @@ class InputViewController: UIViewController, UIPickerViewDelegate, UIPickerViewD
     private let realm = try! Realm()
     
     var task: Task!
+    
     private var category: Category!
     private var categoryName = ""
     // DB内のカテゴリーが格納されるリスト。
-    private var categoryArray = try! Realm().objects(Category.self).filter("id >= 1").sorted(byKeyPath: "id", ascending: true)
+    private var categoryArray = try! Realm().objects(Category.self).sorted(byKeyPath: "id", ascending: true)
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -39,7 +40,6 @@ class InputViewController: UIViewController, UIPickerViewDelegate, UIPickerViewD
         self.view.addGestureRecognizer(tapGesture)
         
         self.titleTextField.text = task.title
-        //categoryTextField.text = task.category
         self.contentsTextView.text = task.contents
         self.categoryLabel.text = task.category?.name
         self.datePicker.date = task.date
@@ -58,7 +58,6 @@ class InputViewController: UIViewController, UIPickerViewDelegate, UIPickerViewD
         
         try! realm.write {
             self.task.title = self.titleTextField.text!
-            //self.task.category = self.categoryTextField.text!
             if category != nil {
                 self.task.category = self.category
             }
@@ -70,36 +69,6 @@ class InputViewController: UIViewController, UIPickerViewDelegate, UIPickerViewD
         setNotification(task: task)
         
         super.viewWillDisappear(animated)
-    }
-    
-    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        let categoryViewController:CategoryViewController = segue.destination as! CategoryViewController
-        let category = Category()
-        let allCategories = realm.objects(Category.self)
-        category.id = allCategories.max(ofProperty: "id")! + 1
-        categoryViewController.category = category
-    }
-    
-    // UIPickerViewの列の数
-    func numberOfComponents(in pickerView: UIPickerView) -> Int {
-        return 1
-    }
-    
-    // UIPickerViewの行数、リストの数
-    func pickerView(_ pickerView: UIPickerView, numberOfRowsInComponent component: Int) -> Int {
-        return categoryArray.count
-    }
-    
-    // UIPickerViewの最初の表示
-    func pickerView(_ pickerView: UIPickerView, titleForRow row: Int, forComponent component: Int) -> String? {
-        let text = categoryArray[row].name
-        return text
-    }
-    
-    // UIPickerViewのRowが選択された時の挙動
-    func pickerView(_ pickerView: UIPickerView, didSelectRow row: Int, inComponent component: Int) {
-        categoryLabel.text = categoryArray[row].name
-        categoryName = categoryArray[row].name
     }
     
     // タスクのローカル通知を登録する --- ここから ---
@@ -145,5 +114,35 @@ class InputViewController: UIViewController, UIPickerViewDelegate, UIPickerViewD
     @objc func dismissKeyboard(){
         // キーボードを閉じる
         view.endEditing(true)
+    }
+}
+
+// MARK: - UIPickerViewDelegate
+extension InputViewController: UIPickerViewDelegate {
+    
+    // UIPickerViewの列の数
+    func numberOfComponents(in pickerView: UIPickerView) -> Int {
+        return 1
+    }
+    
+    // UIPickerViewの行数、リストの数
+    func pickerView(_ pickerView: UIPickerView, numberOfRowsInComponent component: Int) -> Int {
+        return categoryArray.count
+    }
+}
+
+// MARK: - UIPickerViewDataSource
+extension InputViewController: UIPickerViewDataSource {
+    
+    // UIPickerViewの最初の表示
+    func pickerView(_ pickerView: UIPickerView, titleForRow row: Int, forComponent component: Int) -> String? {
+        let text = categoryArray[row].name
+        return text
+    }
+    
+    // UIPickerViewのRowが選択された時の挙動
+    func pickerView(_ pickerView: UIPickerView, didSelectRow row: Int, inComponent component: Int) {
+        categoryLabel.text = categoryArray[row].name
+        categoryName = categoryArray[row].name
     }
 }

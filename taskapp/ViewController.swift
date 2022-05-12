@@ -9,7 +9,8 @@ import UIKit
 import RealmSwift
 import UserNotifications
 
-class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSource, UIPickerViewDelegate, UIPickerViewDataSource {
+// MARK: vars and lifecycle
+class ViewController: UIViewController {
     
     @IBOutlet private weak var tableView: UITableView! {
         didSet {
@@ -18,14 +19,6 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
             self.tableView.dataSource = self
         }
     }
-    
-    /*
-    @IBOutlet weak var searchBar: UISearchBar! {
-        didSet {
-            self.searchBar.delegate = self
-        }
-    }
-    */
     
     @IBOutlet private weak var pickerView: UIPickerView! {
         didSet {
@@ -43,16 +36,21 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
     private var taskArray = try! Realm().objects(Task.self).sorted(byKeyPath: "date", ascending: true)
     
     // DB内のカテゴリーが格納されるリスト。
-    private var categoryArray = try! Realm().objects(Category.self).sorted(byKeyPath: "id", ascending: true)
+    //private var categoryArray = try! Realm().objects(Category.self).sorted(byKeyPath: "id", ascending: true)
+    private var categoryArray : [Category] = []
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        let list = try! Realm().objects(Category.self).sorted(byKeyPath: "id", ascending: true)
         let zeroCategory = Category()
         zeroCategory.id = 0
         zeroCategory.name = "すべてのカテゴリ"
-        try! realm.write {
-            self.realm.add(zeroCategory, update: .modified)
-        }
+        categoryArray = list.map {$0}
+        categoryArray.append(zeroCategory)
+       
+        //categoryArray.first?.append(zeroCategory)
+        //categoryArray[0] = zeroCategory
     }
     
     // 入力画面から戻ってきた時に TableView を更新させる
@@ -80,7 +78,11 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
             inputViewController.task = task
         }
     }
+}
 
+// MARK: - UITableViewDataSource
+extension ViewController: UITableViewDataSource {
+    
     // データの数（＝セルの数）を返すメソッド
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return taskArray.count
@@ -103,6 +105,10 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
 
         return cell
     }
+}
+
+// MARK: - UITableViewDelegate
+extension ViewController: UITableViewDelegate {
 
     // 各セルを選択した時に実行されるメソッド
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
@@ -141,6 +147,10 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
             }
         }
     }
+}
+
+// MARK: - UIPickerViewDelegate
+extension ViewController: UIPickerViewDelegate {
     
     // UIPickerViewの列の数
     func numberOfComponents(in pickerView: UIPickerView) -> Int {
@@ -151,6 +161,10 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
     func pickerView(_ pickerView: UIPickerView, numberOfRowsInComponent component: Int) -> Int {
         return categoryArray.count
     }
+}
+
+// MARK: - UIPickerViewDataSource
+extension ViewController: UIPickerViewDataSource {
     
     // UIPickerViewの最初の表示
     func pickerView(_ pickerView: UIPickerView, titleForRow row: Int, forComponent component: Int) -> String? {
@@ -160,7 +174,7 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
     
     // UIPickerViewのRowが選択された時の挙動
     func pickerView(_ pickerView: UIPickerView, didSelectRow row: Int, inComponent component: Int) {
-        let searchResults = realm.objects(Task.self).filter("category.name == %@", categoryArray[row].name)
+        let searchResults = realm.objects(Task.self).filter("category.id == %@", row)
         let allTasks = realm.objects(Task.self)
         
         if categoryArray[row].name != "すべてのカテゴリ" {
@@ -171,20 +185,4 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
         
         tableView.reloadData()
     }
-    
-    /*
-    //  検索バーに入力があったら呼ばれる
-    func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
-        let searchResults = realm.objects(Task.self).filter("category == %@", searchText)
-        let allTasks = realm.objects(Task.self)
-        
-        if searchText != "" {
-            taskArray = searchResults
-        } else {
-            taskArray = allTasks
-        }
-        
-        tableView.reloadData()
-    }
-    */
 }
