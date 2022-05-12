@@ -20,12 +20,8 @@ class ViewController: UIViewController {
         }
     }
     
-    @IBOutlet private weak var pickerView: UIPickerView! {
-        didSet {
-            self.pickerView.delegate = self
-            self.pickerView.dataSource = self
-        }
-    }
+    @IBOutlet weak var categoryText: UITextField!
+    private var pickerView = UIPickerView()
     
     // Realmインスタンスを取得する
     private let realm = try! Realm()
@@ -48,9 +44,8 @@ class ViewController: UIViewController {
         zeroCategory.name = "すべてのカテゴリ"
         categoryArray = list.map {$0}
         categoryArray.append(zeroCategory)
-       
-        //categoryArray.first?.append(zeroCategory)
-        //categoryArray[0] = zeroCategory
+        
+        createPickerView()
     }
     
     // 入力画面から戻ってきた時に TableView を更新させる
@@ -77,6 +72,10 @@ class ViewController: UIViewController {
             
             inputViewController.task = task
         }
+    }
+    
+    override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
+        categoryText.endEditing(true)
     }
 }
 
@@ -161,6 +160,23 @@ extension ViewController: UIPickerViewDelegate {
     func pickerView(_ pickerView: UIPickerView, numberOfRowsInComponent component: Int) -> Int {
         return categoryArray.count
     }
+    
+    func createPickerView() {
+        pickerView.delegate = self
+        categoryText.inputView = pickerView
+        
+        // toolbar
+        let toolbar = UIToolbar()
+        toolbar.frame = CGRect(x: 0, y: 0, width: self.view.frame.width, height: 44)
+        //let doneButtonItem = UIBarButtonItem(barButtonSystemItem: .done, target: self, action: #selector(ViewController.donePicker))
+        let doneButtonItem = UIBarButtonItem(title: "完了", style: .done, target: self, action: #selector(ViewController.donePicker))
+        toolbar.setItems([doneButtonItem], animated: true)
+        categoryText.inputAccessoryView = toolbar
+    }
+    
+    @objc func donePicker() {
+        categoryText.endEditing(true)
+    }
 }
 
 // MARK: - UIPickerViewDataSource
@@ -177,6 +193,8 @@ extension ViewController: UIPickerViewDataSource {
         let searchResults = realm.objects(Task.self).filter("category.id == %@", row)
         let allTasks = realm.objects(Task.self)
         
+        categoryText.text = categoryArray[row].name
+        
         if categoryArray[row].name != "すべてのカテゴリ" {
             taskArray = searchResults
         } else {
@@ -184,5 +202,6 @@ extension ViewController: UIPickerViewDataSource {
         }
         
         tableView.reloadData()
+        
     }
 }
