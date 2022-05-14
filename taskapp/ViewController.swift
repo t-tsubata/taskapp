@@ -50,6 +50,9 @@ class ViewController: UIViewController {
     
     // 入力画面から戻ってきた時に TableView を更新させる
     override func viewWillAppear(_ animated: Bool) {
+        let list = try! Realm().objects(Category.self).sorted(byKeyPath: "id", ascending: true)
+        categoryArray = list.map {$0}
+        
         super.viewWillAppear(animated)
         tableView.reloadData()
         pickerView.reloadAllComponents()
@@ -190,15 +193,15 @@ extension ViewController: UIPickerViewDataSource {
     
     // UIPickerViewのRowが選択された時の挙動
     func pickerView(_ pickerView: UIPickerView, didSelectRow row: Int, inComponent component: Int) {
-        let searchResults = realm.objects(Task.self).filter("category.id == %@", row)
+        let searchResults = realm.objects(Task.self).filter("category.id == %@", categoryArray[row].id)
         let allTasks = realm.objects(Task.self)
         
         categoryText.text = categoryArray[row].name
         
-        if categoryArray[row].name != "すべてのカテゴリ" {
-            taskArray = searchResults
-        } else {
+        if categoryArray[row].id == 0 {
             taskArray = allTasks
+        } else {
+            taskArray = searchResults
         }
         
         tableView.reloadData()

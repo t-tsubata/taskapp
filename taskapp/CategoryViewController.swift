@@ -31,41 +31,53 @@ class CategoryViewController: UIViewController {
     }
     
     @objc func tapButton(_ sender: UIButton){
-        let realm = try! Realm()
-        let category = Category()
-        let allCategories = realm.objects(Category.self)
-        let successAlert = UIAlertController(title: "登録成功", message: "登録に成功しました。", preferredStyle: .alert)
-        let okAction = UIAlertAction(title: "OK", style: .default) { (action) in
-            self.dismiss(animated: true, completion: nil)
+        guard let categoryText = self.categoryTextField.text, !categoryText.isEmpty else {
+            return
         }
-        successAlert.addAction(okAction)
+        
+        let realm = try! Realm()
+        let allCategories = realm.objects(Category.self)
+        
+        if allCategories.contains(where: {$0.name == categoryText}) {
+            print("重複")
+            showDuplicateAlert()
+            return
+        }
+        
+        let category = Category()
+        category.name = categoryText
+        
+        if allCategories.isEmpty {
+            print("新規")
+            category.id = 0
+        } else {
+            print("2個以上目のカテゴリー")
+            category.id = allCategories.max(ofProperty: "id")! + 1
+        }
         
         try! realm.write {
-            if self.categoryTextField.text != "" {
-                if allCategories.count != 0 {
-                    if allCategories.contains(where: {$0.name == categoryTextField.text!}) {
-                        print("重複")
-                        let duplicationAlert = UIAlertController(title: "カテゴリーの重複", message: "カテゴリーが重複したため、登録できませんでした。", preferredStyle: .alert)
-                        let okAction = UIAlertAction(title: "OK", style: .default) { (action) in
-                            self.dismiss(animated: true, completion: nil)
-                        }
-                        duplicationAlert.addAction(okAction)
-                        self.present(duplicationAlert, animated: true, completion: nil)
-                    } else {
-                        print("2個以上目のカテゴリー")
-                        category.id = allCategories.max(ofProperty: "id")! + 1
-                        category.name = self.categoryTextField.text!
-                        realm.add(category, update: .modified)
-                        self.present(successAlert, animated: true, completion: nil)
-                    }
-                } else {
-                    print("新規")
-                    category.id = 0
-                    category.name = self.categoryTextField.text!
-                    realm.add(category, update: .modified)
-                    self.present(successAlert, animated: true, completion: nil)
-                }
-            }
+            realm.add(category, update: .modified)
         }
+        
+        showRegisterAlert()
+    }
+    
+    func showRegisterAlert() {
+        let registerAlert = UIAlertController(title: "登録成功", message: "登録に成功しました。", preferredStyle: .alert)
+        let okAction = UIAlertAction(title: "OK", style: .default) { (action) in
+            self.navigationController?.popViewController(animated: true)
+        }
+        
+        registerAlert.addAction(okAction)
+        self.present(registerAlert, animated: true, completion: nil)
+    }
+    
+    func showDuplicateAlert() {
+        let duplicateAlert = UIAlertController(title: "カテゴリーの重複", message: "カテゴリーが重複したため、登録できませんでした。", preferredStyle: .alert)
+        let okAction = UIAlertAction(title: "OK", style: .default) { (action) in
+            self.navigationController?.popViewController(animated: true)
+        }
+        duplicateAlert.addAction(okAction)
+        self.present(duplicateAlert, animated: true, completion: nil)
     }
 }
