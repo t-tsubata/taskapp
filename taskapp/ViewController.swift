@@ -23,17 +23,14 @@ class ViewController: UIViewController {
     @IBOutlet weak var categoryText: UITextField!
     private var pickerView = UIPickerView()
     
-    // Realmインスタンスを取得する
-    private let realm = try! Realm()
-    
-    // DB内のタスクが格納されるリスト。
-    // 日付の近い順でソート：昇順
-    // 以降内容をアップデートするとリスト内は自動的に更新される。
+    // DB内のタスクが格納されるリスト(日付の近い順でソート：昇順)
     private var taskArray = try! Realm().objects(Task.self).sorted(byKeyPath: "date", ascending: true)
     
-    // DB内のカテゴリーが格納されるリスト。
-    //private var categoryArray = try! Realm().objects(Category.self).sorted(byKeyPath: "id", ascending: true)
+    // DB内のカテゴリーが格納されるリスト
     private var categoryArray : [Category] = []
+    
+    // Realmインスタンスを取得する
+    private let realm = try! Realm()
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -59,7 +56,7 @@ class ViewController: UIViewController {
     }
     
     // segue で画面遷移する時に呼ばれる
-    override func prepare(for segue: UIStoryboardSegue, sender: Any?){
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         let inputViewController:InputViewController = segue.destination as! InputViewController
         
         if segue.identifier == "cellSegue" {
@@ -85,12 +82,20 @@ class ViewController: UIViewController {
 // MARK: - UITableViewDataSource
 extension ViewController: UITableViewDataSource {
     
-    // データの数（＝セルの数）を返すメソッド
+    /// セルの数を返す
+    /// - Parameters:
+    ///   - tableView: tableviewのインスタンス
+    ///   - section: tableviewの列数
+    /// - Returns: DB内のタスクが格納されるリストの数
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return taskArray.count
     }
-
-    // 各セルの内容を返すメソッド
+    
+    /// 各セルの内容を返す
+    /// - Parameters:
+    ///   - tableView: tableviewのインスタンス
+    ///   - indexPath: 各cellへのパス
+    /// - Returns: cell
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         // 再利用可能な cell を得る
         let cell = tableView.dequeueReusableCell(withIdentifier: "Cell", for: indexPath)
@@ -112,17 +117,28 @@ extension ViewController: UITableViewDataSource {
 // MARK: - UITableViewDelegate
 extension ViewController: UITableViewDelegate {
 
-    // 各セルを選択した時に実行されるメソッド
+    /// 各セルを選択した時に実行
+    /// - Parameters:
+    ///   - tableView: tableviewのインスタンス
+    ///   - indexPath: 選択されたcellへのパス
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         performSegue(withIdentifier: "cellSegue",sender: nil)
     }
-
-    // セルが削除が可能なことを伝えるメソッド
+    
+    /// セルの編集スタイルを返す
+    /// - Parameters:
+    ///   - tableView: tableviewのインスタンス
+    ///   - indexPath: 各cellへのパス
+    /// - Returns: 削除する
     func tableView(_ tableView: UITableView, editingStyleForRowAt indexPath: IndexPath)-> UITableViewCell.EditingStyle {
         return .delete
     }
-
-    // Delete ボタンが押された時に呼ばれるメソッド
+    
+    /// 各編集スタイルが実行されたときに呼ばれる
+    /// - Parameters:
+    ///   - tableView: tableviewのインスタンス
+    ///   - editingStyle: 編集スタイル
+    ///   - indexPath: 各cellへのパス
     func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
         // --- ここから ---
         if editingStyle == .delete {
@@ -154,44 +170,60 @@ extension ViewController: UITableViewDelegate {
 // MARK: - UIPickerViewDelegate
 extension ViewController: UIPickerViewDelegate {
     
-    // UIPickerViewの列の数
+    /// Pickerの列数を返す
+    /// - Parameter pickerView: pickerviewのインスタンス
+    /// - Returns: 1
     func numberOfComponents(in pickerView: UIPickerView) -> Int {
         return 1
     }
     
-    // UIPickerViewの行数、リストの数
+    /// Pickerの行数を返す
+    /// - Parameters:
+    ///   - pickerView: pickerviewのインスタンス
+    ///   - component: pickerの列数
+    /// - Returns: DB内のカテゴリーが格納されるリストの数
     func pickerView(_ pickerView: UIPickerView, numberOfRowsInComponent component: Int) -> Int {
         return categoryArray.count
     }
     
+    /// Pickerの完了ボタンが押されたときの処理
+    @objc func donePicker() {
+        categoryText.endEditing(true)
+    }
+    
+    /// PickerViewの作成
     func createPickerView() {
         pickerView.delegate = self
         categoryText.inputView = pickerView
         
-        // toolbar
+        // toolbarに関する処理
         let toolbar = UIToolbar()
         toolbar.frame = CGRect(x: 0, y: 0, width: self.view.frame.width, height: 44)
-        //let doneButtonItem = UIBarButtonItem(barButtonSystemItem: .done, target: self, action: #selector(ViewController.donePicker))
-        let doneButtonItem = UIBarButtonItem(title: "完了", style: .done, target: self, action: #selector(ViewController.donePicker))
+        let doneButtonItem = UIBarButtonItem(title: "完了", style: .done, target: self, action: #selector(self.donePicker))
         toolbar.setItems([doneButtonItem], animated: true)
         categoryText.inputAccessoryView = toolbar
-    }
-    
-    @objc func donePicker() {
-        categoryText.endEditing(true)
     }
 }
 
 // MARK: - UIPickerViewDataSource
 extension ViewController: UIPickerViewDataSource {
     
-    // UIPickerViewの最初の表示
+    /// PickerViewの表示
+    /// - Parameters:
+    ///   - pickerView: pickerviewのインスタンス
+    ///   - row: pickerの列
+    ///   - component: コンポーネントを識別する番号
+    /// - Returns: カテゴリー名
     func pickerView(_ pickerView: UIPickerView, titleForRow row: Int, forComponent component: Int) -> String? {
         let text = categoryArray[row].name
         return text
     }
     
-    // UIPickerViewのRowが選択された時の挙動
+    /// Pickerの各列が選択されたときの挙動
+    /// - Parameters:
+    ///   - pickerView: pickerviewのインスタンス
+    ///   - row: pickerの列
+    ///   - component: コンポーネントを識別する番号
     func pickerView(_ pickerView: UIPickerView, didSelectRow row: Int, inComponent component: Int) {
         let searchResults = realm.objects(Task.self).filter("category.id == %@", categoryArray[row].id)
         let allTasks = realm.objects(Task.self)
@@ -205,6 +237,5 @@ extension ViewController: UIPickerViewDataSource {
         }
         
         tableView.reloadData()
-        
     }
 }

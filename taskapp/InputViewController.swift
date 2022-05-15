@@ -26,7 +26,6 @@ class InputViewController: UIViewController {
     private let realm = try! Realm()
     
     var task: Task!
-    
     private var category: Category!
     private var categoryName = ""
     // DB内のカテゴリーが格納されるリスト。
@@ -70,8 +69,9 @@ class InputViewController: UIViewController {
         
         super.viewWillDisappear(animated)
     }
-    
-    // タスクのローカル通知を登録する --- ここから ---
+
+    /// タスクのローカル通知を登録
+    /// - Parameter task: タスククラスのインスタンス
     func setNotification(task: Task) {
         let content = UNMutableNotificationContent()
         // タイトルと内容を設定(中身がない場合メッセージ無しで音だけの通知になるので「(xxなし)」を表示する)
@@ -111,8 +111,8 @@ class InputViewController: UIViewController {
         }
     }
     
+    /// キーボードを閉じる
     @objc func dismissKeyboard(){
-        // キーボードを閉じる
         view.endEditing(true)
     }
 }
@@ -120,12 +120,18 @@ class InputViewController: UIViewController {
 // MARK: - UIPickerViewDelegate
 extension InputViewController: UIPickerViewDelegate {
     
-    // UIPickerViewの列の数
+    /// PickerViewの列の数
+    /// - Parameter pickerView: pickerviewのインスタンス
+    /// - Returns: 1
     func numberOfComponents(in pickerView: UIPickerView) -> Int {
         return 1
     }
     
-    // UIPickerViewの行数、リストの数
+    /// Pickerの行数を返す
+    /// - Parameters:
+    ///   - pickerView: pickerviewのインスタンス
+    ///   - component: pickerの列数
+    /// - Returns: DB内のカテゴリーが格納されるリストの数
     func pickerView(_ pickerView: UIPickerView, numberOfRowsInComponent component: Int) -> Int {
         return categoryArray.count
     }
@@ -134,13 +140,22 @@ extension InputViewController: UIPickerViewDelegate {
 // MARK: - UIPickerViewDataSource
 extension InputViewController: UIPickerViewDataSource {
     
-    // UIPickerViewの最初の表示
+    /// PickerViewの表示
+    /// - Parameters:
+    ///   - pickerView: pickerviewのインスタンス
+    ///   - row: pickerの列
+    ///   - component: コンポーネントを識別する番号
+    /// - Returns: カテゴリー名
     func pickerView(_ pickerView: UIPickerView, titleForRow row: Int, forComponent component: Int) -> String? {
         let text = categoryArray[row].name
         return text
     }
     
-    // UIPickerViewのRowが選択された時の挙動
+    /// Pickerの各列が選択されたときの挙動
+    /// - Parameters:
+    ///   - pickerView: pickerviewのインスタンス
+    ///   - row: pickerの列
+    ///   - component: コンポーネントを識別する番号
     func pickerView(_ pickerView: UIPickerView, didSelectRow row: Int, inComponent component: Int) {
         categoryLabel.text = categoryArray[row].name
         categoryName = categoryArray[row].name
