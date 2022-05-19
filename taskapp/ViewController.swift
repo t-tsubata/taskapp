@@ -35,6 +35,13 @@ class ViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        createPickerView()
+    }
+    
+    // 入力画面から戻ってきた時に TableView を更新させる
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        
         let list = try! Realm().objects(Category.self).sorted(byKeyPath: "id", ascending: true)
         let zeroCategory = Category()
         zeroCategory.id = 0
@@ -42,15 +49,6 @@ class ViewController: UIViewController {
         categoryArray = list.map {$0}
         categoryArray.append(zeroCategory)
         
-        createPickerView()
-    }
-    
-    // 入力画面から戻ってきた時に TableView を更新させる
-    override func viewWillAppear(_ animated: Bool) {
-        let list = try! Realm().objects(Category.self).sorted(byKeyPath: "id", ascending: true)
-        categoryArray = list.map {$0}
-        
-        super.viewWillAppear(animated)
         tableView.reloadData()
         pickerView.reloadAllComponents()
     }
@@ -230,7 +228,7 @@ extension ViewController: UIPickerViewDataSource {
         
         categoryText.text = categoryArray[row].name
         
-        if categoryArray[row].id == 0 {
+        if categoryArray[row].name == "すべてのカテゴリ" {
             taskArray = allTasks
         } else {
             taskArray = searchResults
