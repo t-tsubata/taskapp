@@ -52,7 +52,7 @@ class CategoryViewController: UIViewController {
         
         if allCategories.isEmpty {
             print("新規")
-            category.id = 0
+            category.id = 1
         } else {
             print("2個以上目のカテゴリー")
             category.id = allCategories.max(ofProperty: "id")! + 1
